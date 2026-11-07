@@ -1,8 +1,10 @@
 import { createInertiaApp } from '@inertiajs/vue3';
 import { initializeTheme } from '@/composables/useAppearance';
+import AdminLayout from '@/layouts/AdminLayout.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import SettingsLayout from '@/layouts/settings/Layout.vue';
+import StorefrontLayout from '@/layouts/StorefrontLayout.vue';
 import { initializeFlashToast } from '@/lib/flashToast';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
@@ -13,6 +15,10 @@ void createInertiaApp({
         switch (true) {
             case name === 'Welcome':
                 return null;
+            case name === 'Dashboard' || name.startsWith('admin/'):
+                return AdminLayout;
+            case name.startsWith('frontend/'):
+                return StorefrontLayout;
             case name.startsWith('auth/'):
                 return AuthLayout;
             case name.startsWith('settings/'):
