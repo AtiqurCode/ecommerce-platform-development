@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Form, Head } from '@inertiajs/vue3';
+import { ref } from 'vue';
 import InputError from '@/components/InputError.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
 import TextLink from '@/components/TextLink.vue';
@@ -11,7 +12,6 @@ import { Spinner } from '@/components/ui/spinner';
 import { register } from '@/routes';
 import { store } from '@/routes/login';
 import { request } from '@/routes/password';
-import PasskeyVerify from '@/components/PasskeyVerify.vue';
 
 defineOptions({
     layout: {
@@ -24,6 +24,17 @@ defineProps<{
     status?: string;
     canResetPassword: boolean;
 }>();
+
+const email = ref('');
+const password = ref('');
+
+const adminEmail = 'admin@example.com';
+const adminPassword = 'password';
+
+function fillAdminCredentials(): void {
+    email.value = adminEmail;
+    password.value = adminPassword;
+}
 </script>
 
 <template>
@@ -36,8 +47,6 @@ defineProps<{
         {{ status }}
     </div>
 
-    <PasskeyVerify />
-
     <Form
         v-bind="store.form()"
         :reset-on-success="['password']"
@@ -49,6 +58,7 @@ defineProps<{
                 <Label for="email">Email address</Label>
                 <Input
                     id="email"
+                    v-model="email"
                     type="email"
                     name="email"
                     required
@@ -74,6 +84,7 @@ defineProps<{
                 </div>
                 <PasswordInput
                     id="password"
+                    v-model="password"
                     name="password"
                     required
                     :tabindex="2"
@@ -90,16 +101,32 @@ defineProps<{
                 </Label>
             </div>
 
-            <Button
-                type="submit"
-                class="mt-4 w-full"
-                :tabindex="4"
-                :disabled="processing"
-                data-test="login-button"
-            >
-                <Spinner v-if="processing" />
-                Log in
-            </Button>
+            <div class="grid gap-3">
+                <Button
+                    type="button"
+                    variant="outline"
+                    class="w-full rounded-none border-neutral-400 bg-white"
+                    :tabindex="4"
+                    data-test="admin-login-fill"
+                    @click="fillAdminCredentials"
+                >
+                    Admin login
+                </Button>
+                <p class="text-center text-xs text-muted-foreground">
+                    Fills {{ adminEmail }} / {{ adminPassword }}
+                </p>
+
+                <Button
+                    type="submit"
+                    class="w-full rounded-none bg-neutral-950 hover:bg-neutral-800"
+                    :tabindex="4"
+                    :disabled="processing"
+                    data-test="login-button"
+                >
+                    <Spinner v-if="processing" />
+                    Log in
+                </Button>
+            </div>
         </div>
 
         <div class="text-center text-sm text-muted-foreground">
