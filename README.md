@@ -1,28 +1,30 @@
 # E-commerce Platform Development
 
-A simplified e-commerce management app built with the **Laravel + Vue + Inertia** starter kit.
+Laravel + Vue + Inertia technical assessment by **Md. Atiqur Rahman** (`AtiqurCode`).
 
-**What you can do**
-
-- Admin CRUD for **Categories → Subcategories → Products**
-- Product image upload
-- Public product catalogue with SEO-friendly slug URLs (`/products/{slug}`)
-- Session auth via Laravel Fortify
+**Demo (full app walkthrough):**  
+https://www.loom.com/share/5062dded6dbf407282e6754747bbd534
 
 ---
 
-## Reviewer quick start (Docker)
+## START HERE (reviewers)
 
-**Requirements:** [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Compose v2). No local PHP, MySQL, or Node required.
+### Step 1 — Run the project
 
-### Windows (PowerShell)
+Pick **A (Docker)** or **B (local / Laravel Herd)**.
+
+#### Option A — Docker
+
+Requires [Docker Desktop](https://www.docker.com/products/docker-desktop/) only. No local PHP/MySQL/Node needed.
+
+**Windows**
 
 ```powershell
 copy .env.example .env
 .\docker\setup.ps1
 ```
 
-### macOS / Linux
+**macOS / Linux**
 
 ```bash
 cp .env.example .env
@@ -30,162 +32,30 @@ chmod +x docker/setup.sh
 ./docker/setup.sh
 ```
 
-Open **http://localhost**
+Open: **http://localhost**
 
-If port `80` is busy, edit `.env`:
+Port `80` busy? Put this in `.env`, then run setup again:
 
 ```env
 APP_PORT=8080
 APP_URL=http://localhost:8080
 ```
 
-Then run setup again (or `docker compose up -d`).
-
-### Login
-
-| Role  | Email               | Password   |
-|-------|---------------------|------------|
-| Admin | `admin@example.com` | `password` |
-| User  | `test@example.com`  | `password` |
-
-On `/login`, use **Admin login** to auto-fill the admin credentials, then click **Log in**.
-
-### Useful commands
+Useful Docker commands:
 
 ```bash
 docker compose up -d
 docker compose down
-docker compose exec laravel.test php artisan test --compact
+docker compose exec laravel.test bash
 docker compose exec laravel.test php artisan migrate:fresh --seed --force
 ```
 
----
+#### Option B — Local (Laravel Herd / Valet / similar)
 
-## What to review (5-minute path)
+Need PHP 8.4+, Composer, Node 22+, and MySQL (Herd includes these).
 
-1. Open `/products` — public catalogue grouped by subcategory  
-2. Open a product detail page — slug URL, image, prices  
-3. Go to `/login` → Admin login → Dashboard  
-4. CRUD: **Categories**, **Subcategories**, **Products**  
-5. Create/edit a product — category → subcategory dropdown, image upload  
-6. Try deleting a category that still has subcategories (should be blocked)
-
----
-
-## Tech stack
-
-| Layer        | Choice                                      |
-|--------------|---------------------------------------------|
-| Backend      | Laravel 13, PHP 8.4, MySQL, Eloquent        |
-| Auth         | Laravel Fortify (session)                   |
-| Frontend     | Vue 3, TypeScript, Inertia.js v3, Tailwind 4 |
-| Validation   | Form Requests                               |
-| Tests        | Pest                                        |
-| Docker       | Laravel Sail (`compose.yaml`)               |
-
----
-
-## Architecture
-
-```text
-Browser (Vue + Inertia)
-        │
-   Routes / Controllers  →  Form Requests
-        │
-   Services (CRUD, images, slugs, catalogue)
-        │
-   Eloquent Models + MySQL
-```
-
-- Controllers stay thin (HTTP only)
-- Business logic lives in `app/Services`
-- Models hold relations, search scopes, and small helpers
-- Products store only `subcategory_id` — category comes from `product → subcategory → category`
-
----
-
-## Database diagram
-
-![Database diagram](docs/database-diagram.png)
-
-### Domain tables (assignment)
-
-```text
-categories 1──* subcategories 1──* products
-```
-
-| Table           | Purpose |
-|-----------------|--------|
-| `categories`    | Top-level groups (e.g. Electronics) |
-| `subcategories` | Belong to a category (e.g. Mobile Phones) |
-| `products`      | Belong to a subcategory; image path + prices |
-
-**Deletion rules**
-
-| Action | Result |
-|--------|--------|
-| Delete category with subcategories | Blocked |
-| Delete subcategory with products | Blocked |
-| Delete product | Allowed — image file removed |
-
-**Key product columns:** `name`, `slug` (unique), `description`, `image`, `old_price`, `new_price`
-
-### Framework tables
-
-Starter-kit / Laravel tables (`users`, `sessions`, `cache`, `jobs`, `migrations`, `passkeys`, etc.) support auth and infrastructure. Review focus is the green domain tables above.
-
-Optional SQL dump: `database/ecommerce_platform_development.sql`
-
----
-
-## Main routes
-
-### Public (no login)
-
-| Method | URI | Description |
-|--------|-----|-------------|
-| GET | `/` | Redirects to product catalogue |
-| GET | `/products` | Catalogue |
-| GET | `/products/{slug}` | Product details |
-
-### Admin (`auth` + `verified`)
-
-| Area | URI prefix |
-|------|------------|
-| Dashboard | `/dashboard` |
-| Categories | `/admin/categories` |
-| Subcategories | `/admin/subcategories` |
-| Products | `/admin/products` |
-| Dependent dropdown API | `/admin/categories/{id}/subcategories` |
-
----
-
-## Project layout
-
-```text
-app/
-  Http/Controllers/Admin/      # Dashboard, Category, Subcategory, Product
-  Http/Controllers/Frontend/   # Public catalogue + detail
-  Http/Requests/               # Store/Update validation
-  Models/                      # Category, Subcategory, Product, User
-  Services/                    # CRUD, storefront, images, slugs
-compose.yaml                   # Docker Compose
-docker/                        # PHP 8.4 image + setup scripts
-database/
-  migrations/ factories/ seeders/
-  ecommerce_platform_development.sql
-docs/database-diagram.png
-resources/js/pages/
-  admin/…                      # Admin Inertia pages
-  frontend/products/           # Public pages
-tests/Feature/                 # Pest feature tests
-```
-
----
-
-## Native install (optional)
-
-Use this if you prefer Laravel Herd / local PHP instead of Docker.
+1. Link/park the project in Herd (or point your local site to `public/`).
+2. Install and configure:
 
 ```bash
 composer install
@@ -193,9 +63,10 @@ cp .env.example .env
 php artisan key:generate
 ```
 
-Set MySQL in `.env`:
+3. Set MySQL for local (not Docker host `mysql`):
 
 ```env
+APP_URL=http://ecommerce-platform-development.test
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
@@ -204,66 +75,200 @@ DB_USERNAME=root
 DB_PASSWORD=
 ```
 
-Then:
+Create the database in Herd/MySQL if it does not exist yet.
+
+4. Migrate, seed, link storage, build assets:
 
 ```bash
 php artisan migrate --seed
 php artisan storage:link
 npm install
 npm run build
+```
+
+5. Run the app:
+
+```bash
+# Herd serves PHP automatically — just open your site URL
+# For Vite HMR during UI work:
+npm run dev
+
+# Or without Herd:
 composer run dev
 ```
 
----
+Open your Herd URL (example: `http://ecommerce-platform-development.test`) or `http://127.0.0.1:8000` if using `php artisan serve`.
 
-## Images
+First seed downloads product images (needs network). Images are stored under `storage/app/public/products`.
 
-- Stored under `storage/app/public/products`
-- DB keeps the relative path only
-- Public URL via `php artisan storage:link` → `/storage/...`
-- Replace/delete cleans old files (`ProductImageService`)
+### Step 2 — Log in as admin
 
-Seeded demo products use real English names and Unsplash photos (network needed on first `db:seed`).
+| | |
+|---|---|
+| Email | `admin@example.com` |
+| Password | `password` |
 
----
+1. Open `/login`
+2. Click **Admin login** (fills credentials)
+3. Click **Log in**
 
-## Testing
+Also available: `test@example.com` / `password`
+
+### Step 3 — Click through the app
+
+| Check | Where |
+|-------|--------|
+| Public catalogue | `/products` |
+| Product detail (slug URL) | click any product |
+| Dashboard | `/dashboard` |
+| Categories CRUD | `/admin/categories` |
+| Subcategories CRUD | `/admin/subcategories` |
+| Products CRUD + image | `/admin/products` |
+| Dependent dropdown | product create/edit → pick category, subcategory loads |
+| Restricted delete | delete a category that still has subcategories → blocked |
+
+### Step 4 — Run tests
 
 ```bash
 # Docker
 docker compose exec laravel.test php artisan test --compact
 
-# Native
+# Local / Herd
 php artisan test --compact
 ```
 
-Covers CRUD, validation, restricted deletes, image upload/replace/delete, public slug pages, and guest blocking on admin routes.
-
 ---
 
-## Deployment notes (Linux VPS)
+## Check the code (feature → files)
 
-1. Point the web server document root to `public/`
-2. PHP 8.4 + extensions: `mbstring`, `pdo_mysql`, `gd`, `fileinfo`, `bcmath`, …
-3. Configure production `.env`, then:
+Use this map while reviewing.
 
-```bash
-composer install --no-dev --optimize-autoloader
-npm install && npm run build
-php artisan migrate --force
-php artisan db:seed --force
-php artisan storage:link
-php artisan config:cache route:cache view:cache
+| Feature | Backend | Frontend |
+|---------|---------|----------|
+| Routes | `routes/web.php` | — |
+| Categories CRUD | `app/Http/Controllers/Admin/CategoryController.php`  
+`app/Http/Requests/Category/`  
+`app/Services/CategoryService.php`  
+`app/Models/Category.php` | `resources/js/pages/admin/categories/` |
+| Subcategories CRUD | `app/Http/Controllers/Admin/SubcategoryController.php`  
+`app/Http/Requests/Subcategory/`  
+`app/Services/SubcategoryService.php`  
+`app/Models/Subcategory.php` | `resources/js/pages/admin/subcategories/` |
+| Products CRUD + images | `app/Http/Controllers/Admin/ProductController.php`  
+`app/Http/Requests/Product/`  
+`app/Services/ProductService.php`  
+`app/Services/ProductImageService.php`  
+`app/Models/Product.php` | `resources/js/pages/admin/products/` |
+| Category → subcategory API | `app/Http/Controllers/Admin/CategorySubcategoryController.php` | product Create/Edit forms |
+| Dashboard | `app/Http/Controllers/Admin/DashboardController.php`  
+`app/Services/DashboardService.php` | `resources/js/pages/admin/Dashboard.vue` |
+| Public catalogue / detail | `app/Http/Controllers/Frontend/ProductController.php`  
+`app/Services/StorefrontProductService.php` | `resources/js/pages/frontend/products/`  
+`resources/js/components/products/ProductCard.vue` |
+| Slugs | `app/Services/SlugGenerator.php` | — |
+| Seed / demo data | `database/seeders/`  
+`app/Support/EcommerceCatalog.php` | — |
+| Schema | `database/migrations/2026_11_07_*`  
+`docs/database-diagram.png`  
+`database/ecommerce_platform_development.sql` | — |
+| Tests | `tests/Feature/CategoryTest.php`  
+`tests/Feature/SubcategoryTest.php`  
+`tests/Feature/ProductTest.php` | — |
+| Docker setup | `compose.yaml`  
+`docker/setup.sh` / `docker/setup.ps1` | — |
+
+### Folder layout
+
+```text
+app/
+  Http/Controllers/Admin/       # Admin API/pages
+  Http/Controllers/Frontend/    # Public catalogue
+  Http/Requests/                # Validation
+  Models/                       # Category, Subcategory, Product
+  Services/                     # Business logic
+  Support/EcommerceCatalog.php  # Seed/factory English data
+database/
+  migrations/ factories/ seeders/
+  ecommerce_platform_development.sql
+resources/js/
+  pages/admin/                  # Admin UI
+  pages/frontend/products/      # Public UI
+  components/admin/             # Shared admin UI
+  layouts/                      # AdminLayout, StorefrontLayout
+tests/Feature/
+compose.yaml + docker/          # One-command reviewer setup
+docs/database-diagram.png
 ```
 
-4. Ensure `storage` and `bootstrap/cache` are writable  
-5. Do **not** commit `.env` or secrets
+---
+
+## What the app does
+
+- Admin CRUD for **Categories → Subcategories → Products**
+- Product image upload / replace / delete
+- Dependent subcategory dropdown
+- Parent delete blocked when children exist
+- Public catalogue + SEO slug details (`/products/{slug}`)
+- Seeded English products with images
 
 ---
 
-## Submission
+## Database
 
-1. Migrations + seeders run cleanly  
-2. Include SQL dump if required (`database/ecommerce_platform_development.sql`)  
-3. Zip the project, rename with your full name  
-4. Email to `bpcareer3@gmail.com` before **11:59 PM, 08 November 2026**
+![Database diagram](docs/database-diagram.png)
+
+```text
+categories 1──* subcategories 1──* products
+```
+
+| Rule | Behavior |
+|------|----------|
+| Delete category with subcategories | Blocked |
+| Delete subcategory with products | Blocked |
+| Delete product | Allowed (image file removed) |
+
+Products store only `subcategory_id`. Category comes from `product → subcategory → category`.
+
+---
+
+## Main routes
+
+**Public**
+
+| URI | Description |
+|-----|-------------|
+| `/` | Redirects to `/products` |
+| `/products` | Catalogue |
+| `/products/{slug}` | Details |
+
+**Admin** (`auth` + `verified`)
+
+| URI | Description |
+|-----|-------------|
+| `/dashboard` | Stats |
+| `/admin/categories` | Category CRUD |
+| `/admin/subcategories` | Subcategory CRUD |
+| `/admin/products` | Product CRUD |
+| `/admin/categories/{id}/subcategories` | Dependent dropdown JSON |
+
+---
+
+## Tech stack
+
+| Layer | Choice |
+|-------|--------|
+| Backend | Laravel 13, PHP 8.4, MySQL, Eloquent |
+| Auth | Laravel Fortify (session) |
+| Frontend | Vue 3, TypeScript, Inertia.js v3, Tailwind 4 |
+| Validation | Form Requests |
+| Tests | Pest |
+| Containers | Laravel Sail (`compose.yaml`) |
+
+```text
+Browser (Vue + Inertia)
+  → Controllers → Form Requests
+  → Services
+  → Models + MySQL
+```
+
+Controllers stay thin. Domain logic lives in `app/Services`.
