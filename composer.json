@@ -55,6 +55,10 @@
             "Composer\\Config::disableProcessTimeout",
             "@php artisan dev"
         ],
+        "sail": [
+            "Composer\\Config::disableProcessTimeout",
+            "vendor/bin/sail"
+        ],
         "lint": [
             "pint --parallel"
         ],
